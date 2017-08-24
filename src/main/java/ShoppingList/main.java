@@ -51,9 +51,13 @@ public class main {
         System.out.println(itemDao.queryForAll().size());
         System.out.println(storeItemJctnDao.queryForAll().size());
 
+
+        port(8080);
         get("/", (req, res) ->{
-            String r = main.class.getResource("../resources/static/home.html").getFile();
-            FileReader reader = new FileReader(r);
+            main m = new main();
+//            String r = m.getResource("../resources/static/home.html").getFile();
+            String file = m.getClass().getClassLoader().getResource("./static/home.html").toString();
+            FileReader reader = new FileReader(file);
             return reader.toString();
         });
     }
