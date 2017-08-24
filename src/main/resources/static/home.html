@@ -12,7 +12,7 @@
 
     <div ng-repeat="item in items">
         <h3>{{item.name}}</h3>
-        <h4><span ng-repeat="store in item.availableAt">{{store.name}}</span></h4>
+        <h4><span ng-repeat="store in item.availableAt">{{store}}</span></h4>
     </div>
 </div>
 
@@ -23,6 +23,7 @@
 	   $http.get("/items/").then(
 	      function(data){
                 console.log(data);
+
                 $scope.items = data.data
 	      },
 	      function(err){

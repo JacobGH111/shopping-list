@@ -32,9 +32,9 @@ public class Items {
         Store tjs = new Store("Trader Joes");
         Store bestBuy = new Store("Best Buy");
         ArrayList<Item> items = new ArrayList();
-        items.add(new Item("toothbrush", walgreens, walmart));
-        items.add(new Item("DVD player", walmart, bestBuy));
-        items.add(new Item("oranges", walmart, tjs));
+        items.add(new Item("toothbrush"));
+        items.add(new Item("DVD player"));
+        items.add(new Item("oranges"));
 
         return items;
     }
