@@ -7,6 +7,7 @@ import com.j256.ormlite.logger.LocalLog;
 import com.j256.ormlite.logger.Log;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import spark.Spark;
 
 import java.io.FileReader;
 import java.sql.SQLException;
@@ -53,6 +54,7 @@ public class main {
 
 
         port(8080);
+        Spark.staticFileLocation("/public");
         get("/", (req, res) ->{
             main m = new main();
 //            String r = m.getResource("../resources/static/home.html").getFile();
@@ -60,5 +62,6 @@ public class main {
             FileReader reader = new FileReader(file);
             return reader.toString();
         });
+
     }
 }
