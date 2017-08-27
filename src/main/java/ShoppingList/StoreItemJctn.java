@@ -13,16 +13,16 @@ public class StoreItemJctn {
 
     }
 
-    public StoreItemJctn(Store store, Item item){
-        this.store = store;
-        this.item = item;
+    public StoreItemJctn(int store_id, int item_id){
+        this.store_id = store_id;
+        this.item_id = item_id;
     }
 
     @DatabaseField(generatedId = true)
     int id;
 
-    @DatabaseField(foreign = true, columnDefinition = "integer references stores(id) on delete cascade")
-    Store store;
-    @DatabaseField(foreign = true, columnDefinition = "integer references items(id) on delete cascade")
-    Item item;
+    @DatabaseField(columnDefinition = "integer references stores(id) on delete cascade")
+    Integer store_id;
+    @DatabaseField(columnDefinition = "integer references items(id) on delete cascade")
+    Integer item_id;
 }

@@ -99,5 +99,14 @@ public class main {
         path("/storeitemjctn/:id", () -> {
             get("/", (request, response) -> storeItemJctnDao.queryForId(request.params(":id")), json());
         });
+
+        Item i = new Item("toothbrush");
+        Store s = new Store("CVS");
+
+
+        itemDao.create(i);
+        storeDao.create(s);
+        StoreItemJctn j = new StoreItemJctn(s.id, i.id);
+        storeItemJctnDao.create(j);
     }
 }
