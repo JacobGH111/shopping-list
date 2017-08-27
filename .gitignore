@@ -3,3 +3,4 @@ target/
 .idea/tasks.xml
 *.iml
 .idea/libraries/*.xml
+src/main/resources/public/css/
