@@ -36,10 +36,11 @@ class JsonUtil {
  */
 public class main {
     static Gson gson = new Gson();
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         Class.forName("org.h2.Driver");
-        String databaseUrl = "jdbc:h2:mem:account";
-//        String databaseUrl = "jdbc:h2:test";
+//        String databaseUrl = "jdbc:h2:mem:account";
+        String databaseUrl = "jdbc:h2:./test";
 
         ConnectionSource connectionSource = new JdbcConnectionSource(databaseUrl);
 
@@ -47,31 +48,9 @@ public class main {
         Dao<Item, String> itemDao = DaoManager.createDao(connectionSource, Item.class);
         Dao<StoreItemJctn, String> storeItemJctnDao = DaoManager.createDao(connectionSource, StoreItemJctn.class);
 
-        TableUtils.createTable(connectionSource, Store.class);
-        TableUtils.createTable(connectionSource, Item.class);
-        TableUtils.createTable(connectionSource, StoreItemJctn.class);
-
-
-        Item item = new Item("toothbrush");
-        Store store = new Store("Target");
-        StoreItemJctn storeItemJctn = new StoreItemJctn(store, item);
-
-        itemDao.create(item);
-        storeDao.create(store);
-        storeItemJctnDao.create(storeItemJctn);
-
-        List<Item> items = itemDao.queryForAll();
-        System.out.println(items.get(0).id);
-        List<StoreItemJctn> jctns = storeItemJctnDao.queryForAll();
-        StoreItemJctn jctn = jctns.get(0);
-        itemDao.refresh(jctn.item);
-        System.out.println(jctn.item.name);
-
-        System.out.println(storeItemJctnDao.queryForAll().size());
-        itemDao.delete(item);
-        System.out.println(itemDao.queryForAll().size());
-        System.out.println(storeItemJctnDao.queryForAll().size());
-
+        TableUtils.createTableIfNotExists(connectionSource, Store.class);
+        TableUtils.createTableIfNotExists(connectionSource, Item.class);
+        TableUtils.createTableIfNotExists(connectionSource, StoreItemJctn.class);
 
         port(8080);
         Spark.staticFileLocation("/public");
@@ -85,19 +64,40 @@ public class main {
 
         after((request, response) -> response.type("application/json"));
         path("/stores", () -> {
-
-            get("/", (request, response) -> {
-                        return storeDao.queryForAll();
-                    },
-                    json()
-            );
+            get("/", (request, response) -> storeDao.queryForAll(), json());
             post("/", (req, res) -> {
                         Store newStore = gson.fromJson(req.body(), Store.class);
                         storeDao.create(newStore);
-                        return "{\"success\": \"yes\"}";
+                        return "{\"message\": \"created\"}";
                     }
             );
         });
+        path("/store/:id", () -> {
+            get("/", (req, res) -> storeDao.queryForId(req.params(":id")), json());
+        });
 
+        path("/items", () -> {
+            get("/", (request, response) -> itemDao.queryForAll(), json());
+            post("/", ((request, response) -> {
+                Item newItem = gson.fromJson(request.body(), Item.class);
+                itemDao.create(newItem);
+                return "{\"message\": \"created\"}";
+            }));
+        });
+        path("/item/:id", () -> {
+            get("/", (request, response) -> itemDao.queryForId(request.params(":id")), json());
+        });
+
+        path("storeitemjctns", () -> {
+            get("/", (request, response ) -> storeItemJctnDao.queryForAll(), json());
+            post("/", ((request, response) -> {
+                StoreItemJctn jctn = gson.fromJson(request.body(), StoreItemJctn.class);
+                storeItemJctnDao.create(jctn);
+                return "{\"message\": \"created\"}";
+            }));
+        });
+        path("/storeitemjctn/:id", () -> {
+            get("/", (request, response) -> storeItemJctnDao.queryForId(request.params(":id")), json());
+        });
     }
 }
