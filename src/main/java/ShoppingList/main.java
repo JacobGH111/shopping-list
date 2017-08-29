@@ -53,7 +53,14 @@ public class main {
         TableUtils.createTableIfNotExists(connectionSource, StoreItemJctn.class);
 
         port(8080);
-        Spark.staticFileLocation("/public");
+        if(System.getenv("mode").equals("development")){
+            System.out.println("Server is in development mode");
+            staticFiles.externalLocation(System.getProperty("user.dir") + "/src/main/resources/public");
+        }
+        else {
+            System.out.println("Server is in Production mode");
+            Spark.staticFileLocation("/public");
+        }
         get("/", (req, res) -> {
             main m = new main();
 //            String r = m.getResource("../resources/static/home.html").getFile();

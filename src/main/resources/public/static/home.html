@@ -5,7 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-    <link href="/css/home.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="/css/home.css" rel="stylesheet">
 </head>
 <div class="container" ng-app="app" ng-controller="controller">
     <h1>My Shopping list</h1>
@@ -19,7 +19,20 @@
     <div>
         <h3>Add item</h3>
         <input ng-model="newItemName" />
-        <button ng-click="submitNewItem()">New Item</button>
+        <button ng-click="submitNewItem()">Submit</button>
+        <div>
+            <button 
+                ng-repeat="store in stores" 
+                ng-class="{'store-add-selected':selectedStores.indexOf(store.id) > -1}" 
+                ng-click="toggleSelected(store.id)">
+            {{store.name}}
+            </button>
+        </div>
+    </div>
+    <div>
+        <h3>Add store</h3>
+        <input ng-model="newStoreName" />
+        <button ng-click="submitNewStore()">Submit</button>
     </div>
 </div>
 </div>
@@ -27,6 +40,15 @@
 var app = angular.module("app", [])
 app.controller("controller", function($scope, $http) {
 	$scope._ = _
+
+    $scope.selectedStores = [];
+    $scope.toggleSelected = function(id){
+        let arr = $scope.selectedStores;
+        if(arr.indexOf(id) > -1)
+            arr.splice(arr.indexOf(id),1);
+        else
+            arr.push(id);
+    }
 
 	$scope.loadItems = function(){
 	    $http.get("/items/").then(
@@ -55,14 +77,18 @@ app.controller("controller", function($scope, $http) {
 	$scope.loadStoreItemJctns();
 
 
-
-
-
-
     $scope.submitNewItem = function() {
         $http.post("/items/", {"name": $scope.newItemName}).then(function() {
         	$scope.newItemName = ""
         	$scope.loadItems();
+        })
+    }
+
+    $scope.submitNewStore = function(){
+        console.log("submitting")
+        $http.post("/stores/", {"name": $scope.newStoreName}).then(function(){
+            $scope.newStoreName = ""
+            $scope.loadStores();
         })
     }
 })
