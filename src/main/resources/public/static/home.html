@@ -9,24 +9,22 @@
 </head>
 <div class="container" ng-app="app" ng-controller="controller">
     <h1>My Shopping list</h1>
-    <div>
-    	<span ng-repeat="store in stores">{{store.name}}</span>
-    </div>
     <div ng-repeat="item in items">
         <h3>{{item.name}}</h3>
-        <h4><span ng-repeat="store in item.availableAt">{{store}}</span></h4>
+        <h4><span ng-repeat="store in item.stores">{{store.name}}</span></h4>
     </div>
     <div>
         <h3>Add item</h3>
         <input ng-model="newItemName" />
         <button ng-click="submitNewItem()">Submit</button>
         <div>
-            <button 
+            <span
+            	class="store-select"
                 ng-repeat="store in stores" 
                 ng-class="{'store-add-selected':selectedStores.indexOf(store.id) > -1}" 
                 ng-click="toggleSelected(store.id)">
             {{store.name}}
-            </button>
+            </span>
         </div>
     </div>
     <div>
@@ -38,7 +36,7 @@
 </div>
 <script>
 var app = angular.module("app", [])
-app.controller("controller", function($scope, $http) {
+app.controller("controller", function($scope, $http, $q) {
 	$scope._ = _
 
     $scope.selectedStores = [];
@@ -51,36 +49,57 @@ app.controller("controller", function($scope, $http) {
     }
 
 	$scope.loadItems = function(){
-	    $http.get("/items/").then(
-	        function(data) {
-	            $scope.items = data.data
-	        },
-	        function(err) {
-	            console.log(err)
-	    })
+		return new Promise(function(resolve, reject){
+			$http.get("/items/").then(
+		        function(data) {
+		            resolve(data.data)
+		        })
+		})
+
 	}
 	$scope.loadStores = function(){
-		    $http.get("/stores/").then(
-        function(data) {
-            $scope.stores = data.data
-        })
+		return new Promise(function(resolve, reject){
+			$http.get("/stores/").then(
+	        function(data) {
+	            resolve(data.data)
+	        })
+		})
+
 	}
 	$scope.loadStoreItemJctns = function(){
-	    $http.get("/storeitemjctns/").then(
-	        function(data) {
-	            $scope.storeItemJctns = data.data
-	        })
+		return new Promise(function(resolve, reject){
+		    $http.get("/storeitemjctns/").then(
+		        function(data) {
+		            resolve(data.data)
+		    })			
+		})
+
 	}
 
-	$scope.loadItems();
-	$scope.loadStores();
-	$scope.loadStoreItemJctns();
+	$scope.reloadAll = function(){
+		$q.all([$scope.loadItems(), $scope.loadStores(), $scope.loadStoreItemJctns()])
+		.then(function(values) {
+			$scope.items = values[0];
+			$scope.stores = values[1];
+			$scope.storeItemJctns = values[2];
+
+			for(let i=0; i<$scope.items.length; i++){
+				let item = $scope.items[i];
+				item.stores = _.filter($scope.stores, store => _.filter($scope.storeItemJctns, jctn => (jctn.item_id == item.id) && (jctn.store_id == store.id)).length > 0)
+			}
+
+		})		
+	}
+
+	$scope.reloadAll();
+
+
 
 
     $scope.submitNewItem = function() {
         $http.post("/items/", {"name": $scope.newItemName}).then(function() {
         	$scope.newItemName = ""
-        	$scope.loadItems();
+        	$scope.reloadAll();
         })
     }
 
@@ -88,7 +107,7 @@ app.controller("controller", function($scope, $http) {
         console.log("submitting")
         $http.post("/stores/", {"name": $scope.newStoreName}).then(function(){
             $scope.newStoreName = ""
-            $scope.loadStores();
+            $scope.reloadAll();
         })
     }
 })

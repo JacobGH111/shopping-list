@@ -1,5 +1,12 @@
-
-
 .store-add-selected{
 	font-weight: bold;
+}
+
+.store-select{
+	border-radius: 5px;
+	padding: 5px;
+	&:hover{
+		border: 1px solid black;
+	}
+	
 }

@@ -53,7 +53,8 @@ public class main {
         TableUtils.createTableIfNotExists(connectionSource, StoreItemJctn.class);
 
         port(8080);
-        if(System.getenv("mode").equals("development")){
+        String mode = System.getenv("mode");
+        if(mode !=null && mode.equals("development")){
             System.out.println("Server is in development mode");
             staticFiles.externalLocation(System.getProperty("user.dir") + "/src/main/resources/public");
         }
